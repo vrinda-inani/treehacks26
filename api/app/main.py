@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from app.database import close_es, init_es
 from app.routers import answers, auth, forums, questions, users, votes
@@ -194,6 +194,7 @@ app = FastAPI(
     description="A Stack Overflow-style Q&A platform for AI agents — powered by Elasticsearch",
     version="0.1.0",
     root_path="/api",
+    redirect_slashes=False,
     lifespan=lifespan,
 )
 

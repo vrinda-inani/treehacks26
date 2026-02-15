@@ -65,69 +65,65 @@ export const timeAgo = (dateStr: string): string => {
 
 const QuestionCard = ({ question }: { question: QuestionData }) => {
   return (
-    <div className="flex flex-col md:flex-row gap-2 md:gap-4 py-4 border-b border-[#e5e5e5]">
-      {/* Stats Column — desktop only (side) */}
-      <div className="hidden md:flex flex-shrink-0 gap-4 text-center min-w-[120px]">
-        {/* Votes */}
-        <div className="flex flex-col items-center min-w-[50px]">
-          <span className="text-lg font-semibold text-[#1a1a1a]">{question.score}</span>
-          <span className="text-[10px] text-[#999]">votes</span>
-        </div>
-
-        {/* Answers */}
-        <div className="flex flex-col items-center min-w-[50px]">
-          <span className={`text-lg font-semibold rounded px-2 py-0.5 ${
-            question.answer_count === 0
-              ? 'text-[#999]'
-              : 'text-[#1a1a1a] border border-[#e5e5e5]'
+    <Link href={`/humans/question/${question.id}`} className="block rounded-xl border border-border bg-card/50 p-4 mb-3 transition-colors hover:bg-card/80">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-5">
+        {/* Stats Column — desktop only */}
+        <div className="hidden md:flex flex-shrink-0 gap-3 text-center">
+          <div className="flex flex-col items-center min-w-[48px] rounded-lg bg-secondary/50 px-2.5 py-2">
+            <span className="text-base font-bold text-foreground">{question.score}</span>
+            <span className="text-[10px] font-medium text-muted-foreground">votes</span>
+          </div>
+          <div className={`flex flex-col items-center min-w-[48px] rounded-lg px-2.5 py-2 ${
+            question.answer_count > 0
+              ? 'bg-primary/10 ring-1 ring-primary/20'
+              : 'bg-secondary/50'
           }`}>
-            {question.answer_count}
-          </span>
-          <span className="text-[10px] text-[#999] mt-0.5">answers</span>
+            <span className={`text-base font-bold ${
+              question.answer_count > 0 ? 'text-primary' : 'text-muted-foreground'
+            }`}>
+              {question.answer_count}
+            </span>
+            <span className="text-[10px] font-medium text-muted-foreground">answers</span>
+          </div>
         </div>
-      </div>
 
-      {/* Content Column */}
-      <div className="flex-1 min-w-0">
-        {/* Title */}
-        <Link href={`/humans/question/${question.id}`}>
-          <h3 className="text-[15px] md:text-base font-medium text-[#1a6fb5] hover:text-[#1559a0] cursor-pointer mb-1.5 leading-snug">
+        {/* Content Column */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm md:text-base font-semibold text-primary mb-1.5 leading-snug">
             {question.title}
           </h3>
-        </Link>
 
-        {/* Excerpt */}
-        <p className="text-sm text-[#555] mb-3 md:mb-5 line-clamp-2">
-          {question.body}
-        </p>
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
+            {question.body}
+          </p>
 
-        {/* Mobile inline stats */}
-        <div className="flex md:hidden items-center gap-3 text-xs text-[#999] mb-2.5">
-          <span className="font-medium text-[#1a1a1a]">{question.score}</span>
-          <span>votes</span>
-          <span className="text-[#e5e5e5]">·</span>
-          <span className={`font-medium ${question.answer_count > 0 ? 'text-[#1a1a1a]' : ''}`}>{question.answer_count}</span>
-          <span>answers</span>
-        </div>
+          {/* Mobile inline stats */}
+          <div className="flex md:hidden items-center gap-2 text-xs text-muted-foreground mb-3">
+            <span className="font-semibold text-foreground">{question.score}</span>
+            <span>votes</span>
+            <span className="text-border">·</span>
+            <span className={`font-semibold ${question.answer_count > 0 ? 'text-primary' : ''}`}>{question.answer_count}</span>
+            <span>answers</span>
+          </div>
 
-        {/* Agent and forum */}
-        <div className="flex items-center justify-between text-xs">
-          <span className="px-2 py-0.5 rounded bg-[#fdf0e6] text-[#b85a00] text-[11px]">
-            {question.forum_name}
-          </span>
-          <div className="flex items-center gap-2">
-            <div className={`w-5 h-5 rounded ${getAgentColor(question.author_username)} flex items-center justify-center flex-shrink-0`}>
-              <Bot className="w-3 h-3 text-white" />
-            </div>
-            <span className="text-[#f48024] font-medium hover:underline cursor-pointer hidden sm:inline">
-              {question.author_username}
+          {/* Forum tag + author */}
+          <div className="flex items-center justify-between">
+            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-medium ring-1 ring-primary/20">
+              h/{question.forum_name.toLowerCase()}
             </span>
-            <span className="text-[#999] hidden sm:inline">asked {timeAgo(question.created_at)}</span>
-            <span className="text-[#999] sm:hidden">{timeAgo(question.created_at)}</span>
+            <div className="flex items-center gap-2">
+              <div className={`w-5 h-5 rounded-md ${getAgentColor(question.author_username)} flex items-center justify-center flex-shrink-0`}>
+                <Bot className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-xs font-medium text-foreground/70 hidden sm:inline">
+                {question.author_username}
+              </span>
+              <span className="text-[11px] text-muted-foreground">{timeAgo(question.created_at)}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

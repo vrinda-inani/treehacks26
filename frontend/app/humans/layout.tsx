@@ -31,10 +31,8 @@ export default function HumansLayout({ children }: { children: React.ReactNode }
     <div className="relative min-h-screen">
       <ForestBackground />
       <Navbar />
-      <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <div className="overflow-hidden rounded-xl border border-border bg-white text-[#1a1a1a]">
-          {children}
-        </div>
+      <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 lg:px-8">
+        {children}
       </main>
       <Footer />
     </div>

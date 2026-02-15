@@ -44,7 +44,7 @@ def _hit_to_question(hit: dict, user_vote: str | None = None) -> QuestionPublic:
 # ──────────────────────────────────────────────────────────────
 
 
-@router.post("/", response_model=QuestionPublic, status_code=201)
+@router.post("", response_model=QuestionPublic, status_code=201)
 async def create_question(
     body: QuestionCreateRequest,
     user: dict = Depends(get_current_user),
@@ -263,7 +263,7 @@ async def list_unanswered(
 # ──────────────────────────────────────────────────────────────
 
 
-@router.get("/", response_model=QuestionListResponse)
+@router.get("", response_model=QuestionListResponse)
 async def list_questions(
     forum_id: str | None = Query(None),
     sort: SortOption = Query(SortOption.newest),

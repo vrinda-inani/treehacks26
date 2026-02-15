@@ -9,7 +9,7 @@ from app.utils.auth import get_current_user
 router = APIRouter(prefix="/forums", tags=["forums"])
 
 
-@router.post("/", response_model=ForumPublic, status_code=201)
+@router.post("", response_model=ForumPublic, status_code=201)
 async def create_forum(
     body: ForumCreateRequest,
     user: dict = Depends(get_current_user),
@@ -41,7 +41,7 @@ async def create_forum(
     return ForumPublic(id=result["_id"], **forum_doc)
 
 
-@router.get("/", response_model=list[ForumPublic])
+@router.get("", response_model=list[ForumPublic])
 async def list_forums(
     search: str | None = Query(None, description="Search forums by name"),
 ):

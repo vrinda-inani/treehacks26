@@ -33,7 +33,7 @@ export default function FeedPage() {
 
   // Fetch forums
   useEffect(() => {
-    fetch("/api/forums/")
+    fetch("/api/forums")
       .then((r) => r.json())
       .then(setForums)
       .catch(console.error)
@@ -44,16 +44,22 @@ export default function FeedPage() {
     setCurrentPage(1)
   }, [activeForum, activeSort, searchQuery])
 
+  // Clear forum filter when searching
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setActiveForum("all")
+    }
+  }, [searchQuery])
+
   // Fetch questions
   useEffect(() => {
     setLoading(true)
     let url: string
 
     if (searchQuery.trim()) {
-      url = `/api/questions/search/?q=${encodeURIComponent(searchQuery)}&page=${currentPage}`
-      if (activeForum !== "all") url += `&forum_id=${activeForum}`
+      url = `/api/questions/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}`
     } else {
-      url = `/api/questions/?sort=${activeSort}&page=${currentPage}`
+      url = `/api/questions?sort=${activeSort}&page=${currentPage}`
       if (activeForum !== "all") url += `&forum_id=${activeForum}`
     }
 
@@ -104,7 +110,7 @@ export default function FeedPage() {
                   )}
                 >
                   <Hash className="h-3.5 w-3.5" />
-                  all-forums
+                  All Forums
                   <span className="ml-auto font-mono text-xs">{totalForumQuestions}</span>
                 </button>
 
@@ -115,7 +121,7 @@ export default function FeedPage() {
                   {forums.map((forum) => (
                     <button
                       key={forum.id}
-                      onClick={() => setActiveForum(forum.id)}
+                      onClick={() => { setActiveForum(forum.id); setSearchQuery("") }}
                       className={cn(
                         "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
                         activeForum === forum.id
@@ -123,8 +129,7 @@ export default function FeedPage() {
                           : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                       )}
                     >
-                      <Hash className="h-3 w-3 shrink-0" />
-                      <span className="truncate text-xs">{forum.name.toLowerCase()}</span>
+                      <span className="truncate text-xs">h/{forum.name.toLowerCase()}</span>
                       <span className="ml-auto font-mono text-[10px] opacity-70">{forum.question_count}</span>
                     </button>
                   ))}
@@ -135,33 +140,13 @@ export default function FeedPage() {
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Forum header */}
-            {selectedForum && (
-              <div className="mb-5 rounded-xl border border-border bg-card/50 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-border">
-                    <Hash className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="font-mono text-lg font-semibold text-foreground">
-                      #{selectedForum.name.toLowerCase()}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">{selectedForum.description}</p>
-                  </div>
-                  <span className="ml-auto font-mono text-xs text-muted-foreground">
-                    {selectedForum.question_count} questions
-                  </span>
-                </div>
-              </div>
-            )}
-
             {/* Search + sort */}
             <div className="mb-5 flex flex-col gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search questions..."
+                  placeholder="Search all questions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -189,6 +174,23 @@ export default function FeedPage() {
                 )}
               </div>
             </div>
+
+            {/* Forum header — below search, only when a specific forum is selected */}
+            {selectedForum && (
+              <div className="mb-5 rounded-xl border border-border bg-card/50 p-4">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h2 className="font-mono text-lg font-semibold text-foreground">
+                      h/{selectedForum.name.toLowerCase()}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">{selectedForum.description}</p>
+                  </div>
+                  <span className="ml-auto font-mono text-xs text-muted-foreground">
+                    {selectedForum.question_count} questions
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Questions */}
             <div className="flex flex-col">
