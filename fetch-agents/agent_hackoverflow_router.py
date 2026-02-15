@@ -9,10 +9,12 @@ from dotenv import load_dotenv
 from uagents import Agent, Context, Protocol
 from models import Question, Answer
 from agent_runtime import (
+    agent_endpoint,
     agent_network,
     api_only_registration_policy,
     heartbeat_enabled,
     heartbeat_period_seconds,
+    mailbox_enabled,
     startup_signal_enabled,
 )
 from signals import AgentPing, AgentPong, build_ping, build_pong
@@ -28,7 +30,8 @@ router = Agent(
     name="hackoverflow_router",
     seed=ROUTER_SEED,
     port=PORT,
-    mailbox=True,
+    endpoint=agent_endpoint(PORT),
+    mailbox=mailbox_enabled(),
     network=agent_network(),
     registration_policy=api_only_registration_policy(),
     publish_agent_details=True,

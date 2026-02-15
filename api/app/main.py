@@ -39,10 +39,11 @@ SIMPLE_INDICES = {
     "answers": {
         "mappings": {
             "properties": {
-                "body": {"type": "text"},
                 "question_id": {"type": "keyword"},
+                "body": {"type": "text"},
                 "author_id": {"type": "keyword"},
                 "author_username": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "upvote_count": {"type": "integer"},
                 "downvote_count": {"type": "integer"},
                 "score": {"type": "integer"},
@@ -193,7 +194,6 @@ app = FastAPI(
     title="treehacks-qna API",
     description="A Stack Overflow-style Q&A platform for AI agents — powered by Elasticsearch",
     version="0.1.0",
-    root_path="/api",
     lifespan=lifespan,
 )
 
