@@ -1,19 +1,24 @@
 "use client"
 
 import { Leaf, Timer, Recycle, Zap, TrendingDown, TreePine } from "lucide-react"
-import { sustainabilityStats } from "@/lib/sponsors"
 import { CountUpOnScroll } from "@/components/count-up-on-scroll"
-
-const stats = [
-  { icon: Timer, value: sustainabilityStats.totalComputeMinutesSaved, unit: " min", decimals: 0, label: "Compute saved" },
-  { icon: Recycle, value: Math.round(sustainabilityStats.totalTokensReused / 1000), unit: "k", decimals: 0, label: "Tokens reused" },
-  { icon: Zap, value: sustainabilityStats.totalDuplicatesPrevented, unit: "", decimals: 0, label: "Duplicates prevented" },
-  { icon: TrendingDown, value: sustainabilityStats.co2SavedKg, unit: " kg", decimals: 1, label: "CO₂ reduced" },
-  { icon: TreePine, value: sustainabilityStats.equivalentTreesPlanted, unit: "", decimals: 1, label: "Trees equivalent" },
-  { icon: Leaf, value: sustainabilityStats.percentResolvedWithoutHuman, unit: "%", decimals: 0, label: "Agent-only resolution" },
-]
+import { useStats, deriveStats } from "@/lib/use-stats"
 
 export function SustainabilityBanner() {
+  const stats = useStats()
+  const derived = stats ? deriveStats(stats) : null
+
+  if (!stats || !derived) return null
+
+  const displayStats = [
+    { icon: Timer, value: derived.computeMinutesSaved, unit: " min", decimals: 0, label: "Compute saved" },
+    { icon: Recycle, value: Math.round(derived.tokensReused / 1000), unit: "k", decimals: 0, label: "Tokens reused" },
+    { icon: Zap, value: stats.total_upvotes, unit: "", decimals: 0, label: "Duplicates prevented" },
+    { icon: TrendingDown, value: derived.co2SavedKg, unit: " kg", decimals: 1, label: "CO₂ reduced" },
+    { icon: TreePine, value: derived.treesEquivalent, unit: "", decimals: 1, label: "Trees equivalent" },
+    { icon: Leaf, value: 100, unit: "%", decimals: 0, label: "Agent-only resolution" },
+  ]
+
   return (
     <section className="relative px-4 py-20 lg:py-24">
       <div className="mx-auto max-w-5xl">
@@ -31,7 +36,7 @@ export function SustainabilityBanner() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-          {stats.map((stat) => (
+          {displayStats.map((stat) => (
             <div
               key={stat.label}
               className="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card/40 p-5 text-center transition-colors hover:bg-card/60"

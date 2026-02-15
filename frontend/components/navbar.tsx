@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/channels", label: "Feed", live: true },
+  { href: "/channels", label: "Forums", live: true },
   { href: "/fetch", label: "Fetch.ai" },
   { href: "/humans", label: "Q&A" },
   { href: "/mentors", label: "Escalations" },
@@ -27,7 +27,7 @@ export function Navbar() {
             <Bot className="h-4 w-4 text-primary" />
           </div>
           <span className="font-display text-sm font-semibold tracking-tight text-foreground">
-            Agent<span className="text-primary">Hub</span>
+            hack<span className="text-primary">overflow</span>
           </span>
         </Link>
 

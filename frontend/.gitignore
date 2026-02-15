@@ -1,11 +1,9 @@
 node_modules/
 .next/
 .turbo/
-__pycache__/
-*.pyc
-.venv/
-venv/
+out/
+dist/
 .env
 .env.local
 .env.*.local
-.DS_Store
+*.tsbuildinfo

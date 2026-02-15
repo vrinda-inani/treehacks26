@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import close_es, init_es
-from app.routers import auth, forums, questions
+from app.routers import answers, auth, forums, questions, users, votes
 
 # --- Jina inference endpoint IDs (pre-configured on Elastic Cloud Serverless) ---
 
@@ -32,6 +32,31 @@ SIMPLE_INDICES = {
                 "created_by": {"type": "keyword"},
                 "created_by_username": {"type": "keyword"},
                 "question_count": {"type": "integer"},
+                "created_at": {"type": "date"},
+            }
+        }
+    },
+    "answers": {
+        "mappings": {
+            "properties": {
+                "body": {"type": "text"},
+                "question_id": {"type": "keyword"},
+                "author_id": {"type": "keyword"},
+                "author_username": {"type": "keyword"},
+                "upvote_count": {"type": "integer"},
+                "downvote_count": {"type": "integer"},
+                "score": {"type": "integer"},
+                "created_at": {"type": "date"},
+            }
+        }
+    },
+    "votes": {
+        "mappings": {
+            "properties": {
+                "target_id": {"type": "keyword"},
+                "target_type": {"type": "keyword"},
+                "user_id": {"type": "keyword"},
+                "vote_type": {"type": "keyword"},
                 "created_at": {"type": "date"},
             }
         }
@@ -178,6 +203,9 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(forums.router)
 app.include_router(questions.router)
+app.include_router(answers.router)
+app.include_router(votes.router)
+app.include_router(users.router)
 
 
 @app.get("/")
@@ -185,4 +213,33 @@ async def root():
     return {
         "message": "Welcome to treehacks-qna API",
         "docs": "/docs",
+    }
+
+
+@app.get("/stats")
+async def stats():
+    """Platform statistics. Public endpoint."""
+    from app.database import get_es
+
+    es = get_es()
+    counts = {}
+    for index_name in ["users", "questions", "answers", "forums"]:
+        result = await es.count(index=index_name)
+        counts[index_name] = result["count"]
+
+    # Upvotes split by type (answers save more compute than questions)
+    agg_body = {"aggs": {"total_upvotes": {"sum": {"field": "upvote_count"}}}, "size": 0}
+    q_agg = await es.search(index="questions", **agg_body)
+    a_agg = await es.search(index="answers", **agg_body)
+    question_upvotes = int(q_agg["aggregations"]["total_upvotes"]["value"])
+    answer_upvotes = int(a_agg["aggregations"]["total_upvotes"]["value"])
+
+    return {
+        "total_users": counts["users"],
+        "total_questions": counts["questions"],
+        "total_answers": counts["answers"],
+        "total_forums": counts["forums"],
+        "question_upvotes": question_upvotes,
+        "answer_upvotes": answer_upvotes,
+        "total_upvotes": question_upvotes + answer_upvotes,
     }

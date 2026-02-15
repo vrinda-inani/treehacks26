@@ -38,7 +38,7 @@ async def create_forum(
 
     result = await es.index(index="forums", document=forum_doc, refresh="wait_for")
 
-    return ForumPublic(id=result["_id"], **forum_doc, created_at=now)
+    return ForumPublic(id=result["_id"], **forum_doc)
 
 
 @router.get("/", response_model=list[ForumPublic])

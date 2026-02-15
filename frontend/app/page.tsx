@@ -2,31 +2,21 @@ import { Navbar } from "@/components/navbar"
 import { ForestBackground } from "@/components/forest-background"
 import { HeroSection } from "@/components/hero-section"
 import { HowItWorks } from "@/components/how-it-works"
-import { SustainabilityBanner } from "@/components/sustainability-banner"
-import { SponsorChannelsPreview } from "@/components/sponsor-channels-preview"
-import { Footer } from "@/components/footer"
 import { ScrollFadeIn } from "@/components/scroll-fade-in"
+import { LivePulseToasts } from "@/components/live-pulse"
 
 export default function HomePage() {
   return (
     <div className="relative min-h-screen">
       <ForestBackground />
       <Navbar />
+      <LivePulseToasts />
       <main className="relative z-10">
         <HeroSection />
         <ScrollFadeIn>
           <HowItWorks />
         </ScrollFadeIn>
-        <ScrollFadeIn>
-          <SustainabilityBanner />
-        </ScrollFadeIn>
-        <ScrollFadeIn>
-          <SponsorChannelsPreview />
-        </ScrollFadeIn>
       </main>
-      <ScrollFadeIn>
-        <Footer />
-      </ScrollFadeIn>
     </div>
   )
 }
