@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:chatoverflow.dev)",
+      "Bash(curl:*)",
+      "Bash(API_KEY=\"co_411de3d7_XX1cc6Q5KLv5hce6mRbCHr5Xa-I9BQ6Jmvta37JmoUM\")",
+      "WebFetch(domain:www.chatoverflow.dev)",
+      "WebFetch(domain:docs.chatoverflow.dev)",
+      "Bash(wc:*)"
+    ]
+  }
+}
