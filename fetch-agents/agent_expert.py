@@ -1,8 +1,10 @@
 """
 HackOverflow Expert Agent — answers coding questions from the Router.
 Receives Question, generates solution/explanation, sends Answer back to Router.
+Integrates with Modal sandbox testing to validate solutions in parallel.
 """
 import os
+import httpx
 from dotenv import load_dotenv
 from uagents import Agent, Context, Protocol
 from models import Question, Answer
@@ -21,6 +23,7 @@ load_dotenv()
 EXPERT_SEED = os.getenv("AGENT_EXPERT_SEED", "hackoverflow-expert-agent-seed-phrase")
 PORT = int(os.getenv("AGENT_PORT_EXPERT", "8104"))
 ROUTER_ADDRESS = os.getenv("ROUTER_AGENT_ADDRESS", "").strip()
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api").rstrip("/")
 
 expert = Agent(
     name="hackoverflow_expert",
@@ -72,8 +75,69 @@ def _compose_solution(msg: Question) -> tuple[str, str]:
     return solution, lane_note
 
 
+async def _test_solutions_from_database(msg: Question) -> dict | None:
+    """
+    Test existing solutions from the database in parallel Modal sandboxes.
+
+    Returns:
+        Dict with the best solution if found, None otherwise
+    """
+    try:
+        # Construct the question text for searching
+        question_text = f"{msg.error_message or ''} {msg.code or ''}"
+
+        # Call the solution testing API
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                f"{API_BASE_URL}/solutions/test",
+                json={
+                    "question_text": question_text,
+                    "expected_behavior": f"Fix {msg.language or 'code'} error without exceptions",
+                    "language": msg.language or "python",
+                    "max_solutions": 5,  # Test up to 5 solutions in parallel
+                },
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("success") and result.get("solution"):
+                    return result
+
+            return None
+
+    except Exception as e:
+        print(f"Error testing solutions from database: {e}")
+        return None
+
+
 async def _generate_solution(msg: Question) -> Answer:
-    """Generate a solution for the question (demo: template; plug in LLM/code analysis later)."""
+    """
+    Generate a solution for the question.
+
+    First attempts to find and test existing solutions from database in parallel.
+    If no working solution is found, falls back to generating a new one.
+    """
+    # Step 1: Try to find and test existing solutions from database
+    tested_result = await _test_solutions_from_database(msg)
+
+    if tested_result and tested_result.get("success"):
+        # Found a working solution from database!
+        best_solution = tested_result["solution"]
+        message = tested_result.get("message", "")
+
+        return Answer(
+            question_id=msg.question_id,
+            solution=f"✓ Validated solution found in database:\n\n{best_solution.get('code', '')}",
+            explanation=(
+                f"Found and validated working solution from community database. "
+                f"{message}\n"
+                f"Output: {best_solution.get('output', 'N/A')[:200]}"
+            ),
+            code_snippet=best_solution.get("code", ""),
+            verified=True,  # Mark as verified since it passed sandbox testing
+        )
+
+    # Step 2: No working solution found, generate a new one
     solution, lane_note = _compose_solution(msg)
     code_snippet = (
         "# Minimal fix pattern\n"
@@ -83,6 +147,8 @@ async def _generate_solution(msg: Question) -> Answer:
         "    import traceback\n"
         "    traceback.print_exc()\n"
     )
+
+    # Add RunPod triage hint
     runpod_hint = await get_runpod_triage_hint(
         code=msg.code,
         error_message=msg.error_message,
@@ -90,6 +156,10 @@ async def _generate_solution(msg: Question) -> Answer:
     )
     if runpod_hint:
         solution += f"\n\nRunPod triage hint:\n{runpod_hint}"
+
+    # Add note about database testing
+    if tested_result:
+        solution += f"\n\nNote: Tested {len(tested_result.get('all_results', []))} existing solutions from database in parallel, but none worked. Providing a new solution."
 
     return Answer(
         question_id=msg.question_id,
@@ -107,9 +177,18 @@ async def _generate_solution(msg: Question) -> Answer:
 @qa_proto.on_message(Question)
 async def handle_question(ctx: Context, sender: str, msg: Question):
     ctx.logger.info(f"Expert received Question {msg.question_id} from {sender}")
+    ctx.logger.info("Testing existing solutions in parallel Modal sandboxes...")
+
     answer = await _generate_solution(msg)
+
+    if answer.verified:
+        ctx.logger.info("✓ Found and validated working solution from database via parallel testing!")
+    else:
+        ctx.logger.info("No validated solution found in database, provided generated solution.")
+
     if "RunPod triage hint:" in answer.solution:
         ctx.logger.info("Expert answer enriched by RunPod Flash sidecar.")
+
     await ctx.send(sender, answer)
 
 

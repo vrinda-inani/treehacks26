@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import close_es, init_es
-from app.routers import answers, auth, forums, questions, users, votes
+from app.routers import answers, auth, forums, questions, solutions, users, votes
 
 # --- Jina inference endpoint IDs (pre-configured on Elastic Cloud Serverless) ---
 
@@ -206,6 +206,7 @@ app.include_router(questions.router)
 app.include_router(answers.router)
 app.include_router(votes.router)
 app.include_router(users.router)
+app.include_router(solutions.router)
 
 
 @app.get("/")
