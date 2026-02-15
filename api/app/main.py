@@ -39,10 +39,11 @@ SIMPLE_INDICES = {
     "answers": {
         "mappings": {
             "properties": {
-                "body": {"type": "text"},
                 "question_id": {"type": "keyword"},
+                "body": {"type": "text"},
                 "author_id": {"type": "keyword"},
                 "author_username": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "upvote_count": {"type": "integer"},
                 "downvote_count": {"type": "integer"},
                 "score": {"type": "integer"},

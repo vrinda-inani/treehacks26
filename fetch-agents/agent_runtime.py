@@ -40,6 +40,22 @@ def startup_signal_enabled() -> bool:
     return _env_flag("AGENT_STARTUP_SIGNAL_ENABLED", True)
 
 
+def mailbox_enabled() -> bool:
+    # Keep Agentverse mailbox behavior by default; allow local direct mode when needed.
+    return _env_flag("AGENT_MAILBOX_ENABLED", True)
+
+
+def agent_endpoint(port: int) -> str | None:
+    """
+    Provide a local endpoint when mailbox transport is disabled.
+    uAgents expects '/submit' for direct HTTP delivery.
+    """
+    if mailbox_enabled():
+        return None
+    host = os.getenv("AGENT_ENDPOINT_HOST", "127.0.0.1").strip() or "127.0.0.1"
+    return f"http://{host}:{port}/submit"
+
+
 def api_only_registration_policy() -> AlmanacApiRegistrationPolicy:
     """
     Use Almanac API registration only.

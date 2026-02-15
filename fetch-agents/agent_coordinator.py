@@ -17,10 +17,12 @@ from uagents_core.contrib.protocols.chat import (
 )
 
 from agent_runtime import (
+    agent_endpoint,
     agent_network,
     api_only_registration_policy,
     heartbeat_enabled,
     heartbeat_period_seconds,
+    mailbox_enabled,
     startup_signal_enabled,
 )
 from orchestration import run_orchestration
@@ -38,7 +40,8 @@ coordinator = Agent(
     name="hackoverflow_coordinator",
     seed=COORDINATOR_SEED,
     port=PORT,
-    mailbox=True,  # Required: mailbox is the only method for Agentverse/ASI:One
+    endpoint=agent_endpoint(PORT),
+    mailbox=mailbox_enabled(),
     network=agent_network(),
     registration_policy=api_only_registration_policy(),
     publish_agent_details=True,

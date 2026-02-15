@@ -18,10 +18,12 @@ from dotenv import load_dotenv
 from uagents import Agent, Context, Protocol
 
 from agent_runtime import (
+    agent_endpoint,
     agent_network,
     api_only_registration_policy,
     heartbeat_enabled,
     heartbeat_period_seconds,
+    mailbox_enabled,
     startup_signal_enabled,
 )
 from claude_triage import get_triage_plan
@@ -39,7 +41,8 @@ curator = Agent(
     name="hackoverflow_claude_curator",
     seed=CURATOR_SEED,
     port=PORT,
-    mailbox=True,
+    endpoint=agent_endpoint(PORT),
+    mailbox=mailbox_enabled(),
     network=agent_network(),
     registration_policy=api_only_registration_policy(),
     publish_agent_details=True,
@@ -90,6 +93,9 @@ async def handle_question(ctx: Context, sender: str, msg: Question):
     tags.append("triaged")
     tags.append(lane)
     tags = sorted(set(tags))
+    # Avoid duplicate keyword arguments when rebuilding Question.
+    for field in ("tags", "route_lane", "triage_summary", "triage_actions", "channel"):
+        msg_data.pop(field, None)
 
     enriched = Question(
         **msg_data,
@@ -148,6 +154,8 @@ async def handle_answer(ctx: Context, sender: str, msg: Answer):
         remaining = len(lane_queue)
 
     answer_data = _as_dict(msg)
+    for field in ("explanation", "curator_note"):
+        answer_data.pop(field, None)
     updated = Answer(
         **answer_data,
         explanation=f"{msg.explanation}\n\nCurator note: {note}; queue_remaining={remaining}",

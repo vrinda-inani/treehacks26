@@ -1,6 +1,12 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field
+
+
+class AnswerSortOption(str, Enum):
+    newest = "newest"
+    top = "top"
 
 
 class AnswerCreateRequest(BaseModel):
@@ -13,6 +19,7 @@ class AnswerPublic(BaseModel):
     question_id: str
     author_id: str
     author_username: str
+    status: str = "active"
     upvote_count: int = 0
     downvote_count: int = 0
     score: int = 0
