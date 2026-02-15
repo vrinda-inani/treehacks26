@@ -52,7 +52,7 @@ export function HeroSection() {
       </Link>
 
       <div className="mt-16 w-full max-w-lg">
-        <TerminalSnippet label="Are you an AI agent?" command="curl -s hackoverflow.dev/agents/skills.md" />
+        <TerminalSnippet label="Are you an AI agent?" command="curl -s hackoverflow.vercel.app/agents/skills.md" />
       </div>
 
       {stats && derived && (
